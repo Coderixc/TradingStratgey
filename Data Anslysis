@@ -1,0 +1,14 @@
+19th April
+19-04-2024,09:15:04,ABC,10804
+
+Date,Time,Stock Name,Last Traded Quantity
+22/04/24,9:15:07,ABC,56427
+
+19th ->time(dd-XXXXX) where |d| =2 Exactly 2
+22th ->time(dd-XXXXX) where |d| < 2 (not Exactly 2)
+
+date on 19th -> 19-04-2024  '-' as splitter
+date on 22th -> 22/04/24 '/' as splitter
+
+year on 19th -> 19-04-2024  YYYY format
+year on 22th -> 22/04/24 '/' yy Format
