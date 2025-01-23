@@ -97,13 +97,13 @@ class StockVolumeStrategy:
                 self.logger.debug(f"30-day average for stock {stock}: {avg_volume}")
 
             # For 22nd April, include 19th April data
-            recent_data_22nd = stock_data[stock_data['Date'] <= datetime(2024, 4, 22)]
+            recent_data_22nd = stock_data[stock_data['Date'] < datetime(2024, 4, 22)]
             if len(recent_data_22nd) >= 30:
                 avg_volume_22nd = recent_data_22nd['Volume'].tail(30).mean()
                 self.stock_30_day_avg[stock] = avg_volume_22nd
                 self.logger.debug(f"30-day average for stock {stock} (including 19th April): {avg_volume_22nd}")
 
-
+        self.logger.info("processing Average for both day...")
 
     def calculate_crossover(self, date):
         """Calculate when the cumulative volume exceeds the 30-day average volume using a 60-minute rolling window."""
@@ -149,12 +149,12 @@ class StockVolumeStrategy:
                         oldest_time, oldest_qty = volume_window.pop(0)  # Remove the oldest trade
                         cumulative_volume -= oldest_qty
 
-                    # Check for crossover
+                    # Classification on 'check for crossover'
                     if cumulative_volume >= stock_30_day_avg:
                         crossover_timestamp[stock] = timestamp.strftime('%Y-%m-%d %H:%M:%S')
                         self.logger.info(f"Crossover for {stock} found at {timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
                         break
-
+            #If no crossover occurs during the day, the output for that stock should be None.
             if stock not in crossover_timestamp:
                 crossover_timestamp[stock] = None
                 self.logger.info(f"No crossover found for {stock} on {date}.")
@@ -173,6 +173,14 @@ class StockVolumeStrategy:
         intraday_data['DateTime'] = pd.to_datetime(intraday_data['DateTime'], format='%Y-%m-%d %H:%M:%S')
         intraday_data.reset_index( inplace=True)
 
+        is_mix_of_hourly = True
+        if is_mix_of_hourly:
+            intraday_data['AdjustedTime'] = intraday_data['DateTime'] - pd.Timedelta(minutes=15)
+            resampled_data2 = intraday_data.groupby('Stock Name').resample('H', on='AdjustedTime').agg(
+                {'Last Traded Quantity': 'sum'}).reset_index()
+
+            resampled_data2['AdjustedTime'] = resampled_data2['AdjustedTime'] + pd.Timedelta(minutes=15)
+
         #Set 'Stock Name' as the index and resample by 'Timestamp'
         resampled_data = intraday_data.groupby('Stock Name').resample('T', on='DateTime').agg(
             {'Last Traded Quantity': 'sum'}).reset_index()
@@ -180,9 +188,32 @@ class StockVolumeStrategy:
         resampled_data['Timestamp'] = pd.to_datetime(self.intraday_data_19th['DateTime'],
                                                               format='%Y-%m-%d %H:%M:%S').dt.time
 
+        if  is_mix_of_hourly == True:
+           #Combine minutes and Hourly time frame
+           # for idx, row in resampled_data2.iterrows():
+           #
+           #     stock_name = row['Stock Name']
+           #     time_Stamp = pd.to_datetime(row['AdjustedTime'] , format="%Y-%m-%d %H:%M:%S").dt.time
+           #     last_traded_qty = row['Last Traded Quantity']
+           #
+           #     resampled_data.loc[
+           #         (resampled_data['Stock Name'] == stock_name) &
+           #         (resampled_data['DateTime'] == time_Stamp),
+           #         'Hourly_Quantity'
+           #     ] = last_traded_qty
+           #
+           #     # Fill missing hourly values with NaN to handle incomplete candles
+           #     resampled_data['Hourly_Quantity'].fillna(method='ffill', inplace=True)
+           # else:
+           #     resampled_data['Hourly_Quantity'] = None
+            pass
 
 
         return resampled_data
+
+    def clean_data2(self):
+        pass
+
 
     #Main function, which controllfrom loading , processing, validation and Analysis
     def run(self):
