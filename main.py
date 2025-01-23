@@ -17,7 +17,8 @@ trading day. If no crossover occurs during the day, the output for that stock sh
 
 from src import StockVolumeStrategy
 import pandas as pd
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Define file paths
 path = './data/'

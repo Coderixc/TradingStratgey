@@ -16,21 +16,24 @@ This project calculates the timestamp when the cumulative traded volume within a
 
 ## How to Run
 
-1. Install dependencies:
+## 1. Install dependencies:
     ```
     pip install -r requirements.txt
     ```
 
-2. Run the program:
+## 2. Run the program:
     ```
     python main.py
     ```
    
-3.Analysis
+## 3.Analysis
       
-   "Hourly Time Frame"
+   ## "Hourly Time Frame"
    ![img_1.png](img_1.png)
       
-   "Minutes Time Frame"
+   ## "Minutes Time Frame"
    ![img_2.png](img_2.png)
    
+## 4. Output
+
+![img_3.png](img_3.png)

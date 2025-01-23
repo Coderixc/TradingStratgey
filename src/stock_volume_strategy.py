@@ -144,7 +144,7 @@ class StockVolumeStrategy:
                     volume_window.append((timestamp, row['Last Traded Quantity']))
                     cumulative_volume += row['Last Traded Quantity']
 
-                    # Remove old trades beyond 60 minutes
+                    # Remove old  beyond 60 minutes
                     while volume_window and (timestamp - volume_window[0][0]) > timedelta(minutes=60):
                         oldest_time, oldest_qty = volume_window.pop(0)  # Remove the oldest trade
                         cumulative_volume -= oldest_qty
@@ -183,12 +183,12 @@ class StockVolumeStrategy:
 
         #Set 'Stock Name' as the index and resample by 'Timestamp'
         resampled_data = intraday_data.groupby('Stock Name').resample('T', on='DateTime').agg(
-            {'Last Traded Quantity': 'sum'}).reset_index()
+            {'Last Traded Quantity': 'sum','Timestamp':'first'}).reset_index()
 
-        resampled_data['Timestamp'] = pd.to_datetime(self.intraday_data_19th['DateTime'],
-                                                              format='%Y-%m-%d %H:%M:%S').dt.time
+        # resampled_data['Timestamp'] = pd.to_datetime(self.resampled_data['DateTime'],
+        #                                                       format='%Y-%m-%d %H:%M:%S').dt.time
 
-        if  is_mix_of_hourly == True:
+        if  is_mix_of_hourly == True: #TODO: Combine Minutes (or seconds) with Hourly in a Dense WAY
            #Combine minutes and Hourly time frame
            # for idx, row in resampled_data2.iterrows():
            #
